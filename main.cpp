@@ -1,25 +1,46 @@
-#include <SFML/Window.hpp>
-#include <SFML/OpenGL.hpp>
-#include <math.h>
-#include <iostream>
+#include "drawer.hpp"
+#include "point.hpp"
 
-void comp_point(float u, float v)
+/*void comp_superface(float u, float v, float ea, float eb)
 {
-    float x = sin(v)*cos(u);
-    float y = sin(v)*sin(u);
-    float z = cos(v);
-    glVertex3f(x,y,z);
-}
+    glBegin(GL_POLYGON);
+        comp_superpoint(u,v,ea,eb);
+        comp_superpoint(u+0.1,v,ea,eb);
+        comp_superpoint(u,v+0.1,ea,eb);
+        comp_superpoint(u+0.1,v+0.1,ea,eb);
+    glEnd();
+}*/
+
 int main()
 {
     // crée la fenêtre
-    sf::Window window(sf::VideoMode(600, 600), "OpenGL", sf::Style::Default, sf::ContextSettings(32));
+    sf::Window window(sf::VideoMode(600, 600), "Blending shapes", sf::Style::Default, sf::ContextSettings(32));
     window.setVerticalSyncEnabled(true);
+    std::vector<Point> maillage;
 
     // chargement des ressources, initialisation des états OpenGL, ...
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     const double pi = 4.0 * atan(1.0);
-    glTranslatef(0.f,0.f,-1.5);
+    glTranslatef(0.f,0.f,-0.5);
     glRotatef(-45,1.0,0.0,0.0);
+    glScalef(0.3,0.3,0.3);
+
+    for(float u = -pi; u < pi; u += 0.1){
+        for(float v = -(pi/2); v< (pi/2) ; v+=0.1){
+            Point buffpoint;
+            buffpoint.comp(u,v);
+            maillage.push_back(buffpoint);
+
+            buffpoint.comp(u+0.1,v);
+            maillage.push_back(buffpoint);
+            
+            buffpoint.comp(u+0.1,v+0.1);
+            maillage.push_back(buffpoint);
+
+            buffpoint.comp(u,v+0.1);
+            maillage.push_back(buffpoint);
+        }
+    }
     //gluLookAt(1,1,1,0,0,0,0,0,1);
     // la boucle principale
     bool running = true;
@@ -45,20 +66,14 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glColor3f(1.0,1.0,1.0);
+        glBegin(GL_QUADS);
+        for(int it = 0; it < maillage.size()-1; it+=1){
+            Point buffpointa = maillage[it];
 
-        float u, v,c=0.f;
+            glVertex3f(buffpointa.getX(), buffpointa.getY(), buffpointa.getZ());
 
-        for(u = 0.f; u < 2*pi; u+= 0.1){
-            for (v = 0.f; v < pi; v+= 0.1 ){
-                glColor3f(u/5*pi,v/5*pi,u/v);
-                glBegin(GL_POINTS);
-                    comp_point(u,v);
-                    comp_point(u+0.1,v);
-                    comp_point(u+0.1,v+0.1);
-                    comp_point(u,v+0.1);
-                glEnd();
-            }
         }
+        glEnd();       
         // termine la trame courante (en interne, échange les deux tampons de rendu)
         window.display();
     }

@@ -29,3 +29,8 @@ float aux_s(float w, float m)
     float buff = sgn(sin(w))*pow(fabs(sin(w)),m);
     return buff;
 }
+
+float blend(float x)
+{
+    return x;
+}
